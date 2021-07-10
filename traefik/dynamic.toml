@@ -1,0 +1,15 @@
+[http]
+  [http.middlewares]
+    [http.middlewares.auth.basicAuth]
+      users = [
+        "admin:changeme"
+      ]
+
+  [http.routers]
+    [http.routers.api]
+      rule = "Host (`monitor.coala.io`)"
+      entryPoints = ["websecure"]
+      middlewares = ["auth"]
+      service = "api@internal"
+    [http.routers.api.tls]
+      certResolver = "leResolver"

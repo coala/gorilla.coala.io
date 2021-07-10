@@ -1,0 +1,30 @@
+defaultEntryPoints = ["http", "https"]
+
+[api]
+  dashboard = true
+
+[entryPoints.web]
+  address = ":80"
+
+  [entryPoints.web.http]
+    [entryPoints.web.http.redirections]
+      [entryPoints.web.http.redirections.entryPoint]
+        to = "websecure"
+        scheme = "https"
+
+[entryPoints.websecure]
+  address = ":443"
+
+[providers.docker]
+  watch = true
+  network = "web"
+
+[providers.file]
+  filename = "dynamic.toml"
+
+[certificatesResolvers.leResolver.acme]
+  email = "bkhanale@gmail.com"
+  storage = "acme.json"
+
+  [certificatesResolvers.leResolver.acme.httpChallenge]
+    entryPoint = "web"

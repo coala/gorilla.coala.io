@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./traefik.toml:/traefik.toml
+      - ./dynamic.toml:/dynamic.toml
+      - ./acme.json:/acme.json
+      - /var/run/docker.sock:/var/run/docker.sock
