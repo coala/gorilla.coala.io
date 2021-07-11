@@ -19,9 +19,6 @@ defaultEntryPoints = ["http", "https"]
   watch = true
   network = "web"
 
-[providers.file]
-  filename = "dynamic.toml"
-
 [certificatesResolvers.leResolver.acme]
   email = "bkhanale@gmail.com"
   storage = "acme.json"

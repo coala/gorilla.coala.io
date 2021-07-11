@@ -1,14 +1,27 @@
 version: '3'
 
+networks:
+  traefik_default:
+    external: true
+
 services:
   traefik:
     image: traefik:latest
-    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`monitor.coala.io`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entryPoints=websecure"
+      - "traefik.http.routers.dashboard.middlewares=simpleAuth"
+      - "traefik.http.routers.dashboard.tls.certResolver=leResolver"
+      - "traefik.http.middlewares.simpleAuth.basicAuth.users=${USER}:${PASSWORD}"
+    restart: always
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./traefik.toml:/traefik.toml
-      - ./dynamic.toml:/dynamic.toml
       - ./acme.json:/acme.json
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - traefik_default

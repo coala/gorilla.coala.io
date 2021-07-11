@@ -4,36 +4,44 @@ volumes:
   postgres_data:
     driver: local
 
+networks:
+  traefik_default:
+    external: true
+
 services:
   postgres:
     image: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: "${KEYCLOAK_DB}"
+      POSTGRES_DB: keycloak
       POSTGRES_USER: "${DB_USER}"
       POSTGRES_PASSWORD: "${DB_PASSWORD}"
+    labels:
+      - "traefik.enable=false"
+    networks:
+      - traefik_default
+
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     labels:
-      - "traefik.backend=landing"
-      - "traefik.docker.network=outside"
-      - "traefik.frontend.rule=Host:keycloak.coala.io"
-      - "traefik.frontend.headers.STSSeconds=315569260"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.frameDeny=true"
-      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.http.routers.keycloak.rule=Host(`keycloak.coala.io`)"
+      - "traefik.http.routers.tls=true"
+      - "traefik.http.routers.keycloak.tls.certResolver=leResolver"
+      - "traefik.entryPoints.websecure.forwardedHeaders.insecure=true"
       - "traefik.port=8070"
       - "traefik.enable=true"
+    networks:
+      - traefik_default
     environment:
       DB_VENDOR: postgres
-      DB_ADDR: postgres
-      DB_DATABASE: "${KEYCLOAK_DB}"
+      DB_DATABASE: keycloak
       DB_SCHEMA: public
       DB_USER: "${DB_USER}"
       DB_PASSWORD: "${DB_PASSWORD}"
       KEYCLOAK_USER: "${KEYCLOAK_USER}"
       KEYCLOAK_PASSWORD: "${KEYCLOAK_PASSWORD}"
+      PROXY_ADDRESS_FORWARDING: "true"
     ports:
       - 8070:8080
     restart: always
